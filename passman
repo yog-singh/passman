@@ -1,0 +1,111 @@
+CURRENT_DIR=($pwd)
+DEFAULT_VAULT_NAME="asgard_dungeon"
+
+# Usage info
+show_help() {
+    cat << EOF
+    Usage: ${0##*/} [-k Key File] [-f Encrypted Password File] []
+EOF
+}
+
+_create_default_directory_and_add_env_variables() {
+    mkdir ~/.passman
+    echo "Created directory ~/.passman..."
+    if [ -f ~/.zshrc ] 
+    then
+        echo "export PASSMAN_DIR=~/.passman" >> ~/.zshrc
+    fi
+
+    if [ -f ~/.bashrc ] 
+    then
+        echo "export PASSMAN_DIR=~/.passman" >> ~/.bashrc
+    fi
+    echo "Set the required environment variables"
+    PASSMAN_DIR=~/.passman
+}
+
+_is_environment_variables_declared() {
+    if [ -z $PASSMAN_DIR ] 
+    then
+        echo "No directory found for storing passman config and data."
+        echo "Creating directory ~/.passman and adding the environment variable PASSMAN_DIR"
+        _create_default_directory_and_add_env_variables
+    fi
+}
+
+decrypt_vault() {
+    
+}
+
+access_default_vault() {
+    if [ ! -f $PASSMAN_DIR+"/"+$DEFAULT_VAULT_NAME ]
+    then
+        touch $PASSMAN_DIR+"/"+$DEFAULT_VAULT_NAME+".csv"
+        decrypted_vault=$PASSMAN_DIR+"/"+$DEFAULT_VAULT_NAME+".csv"
+    else
+        decrypt_vault()
+}
+
+add_entry_to_vault() {
+    if [ -z $file ] ; then
+        access_default_vault
+    fi
+}
+
+search_vault() {
+
+}
+
+_is_environment_variables_declared
+
+is_new_entry=false
+is_search=true
+while [ $# -gt 0 ]; do
+  key="$1"
+
+  case $key in
+    -k|--key)
+        file_key="$2"
+        shift # past argument
+        shift # past value
+        ;;
+    -f|--file)
+        file="$2"
+        shift # past argument
+        shift # past value
+        ;;
+    -p|--platform)
+        platform="$2"
+        is_new_entry=true
+        shift # past argument
+        shift # past value
+        ;;
+    -u|--username)
+        username="$2"
+        shift # past argument
+        shift # past value
+        ;;
+    -s|--search)
+        search_text="$2"
+        is_search=true
+        shift # past argument
+        shift # past value
+        ;;
+    --help)
+	    show_help
+	    exit 1
+	    ;;
+    \?)
+        echo "Error: Invalid option"
+        exit
+        ;;
+  esac
+done
+
+if [ $is_new_entry = true ] ; then
+    add_entry_to_vault
+fi
+
+if [ $is_search = true ] ; then
+    search_vault
+fi
